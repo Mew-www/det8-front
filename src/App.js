@@ -1,28 +1,66 @@
-import React, { Component } from 'react';
-import logo from './logo.svg';
-import './App.css';
+import React from 'react';
+import { Route, Link, Switch, Redirect } from 'react-router-dom'
+import Login from './subcomponents/Login'
+import Search from './subcomponents/Search'
+import Tickets from './subcomponents/Tickets'
+import PropTypes from 'prop-types'
+import { getUser } from './reducers/auth'
+import { connect } from 'react-redux'
 
-class App extends Component {
+class App extends React.Component {
+  componentDidMount() {
+    this.props.getUser();
+  }
   render() {
     return (
-      <div className="App">
-        <header className="App-header">
-          <img src={logo} className="App-logo" alt="logo" />
-          <p>
-            Edit <code>src/App.js</code> and save to reload.
-          </p>
-          <a
-            className="App-link"
-            href="https://reactjs.org"
-            target="_blank"
-            rel="noopener noreferrer"
-          >
-            Learn React
-          </a>
-        </header>
+      <div>
+        {!this.props.has_initially_loaded ?
+          "Loading..."
+          :
+          <div>
+            {!this.props.user ?
+              ""
+              :
+              <header>
+                <p>Welcome {this.props.user.name}</p>
+                <Link to="/">Search</Link>
+                <Link to="/tickets">Tickets</Link>
+              </header>
+            }
+            <main>
+              {!this.props.user ?
+                <Switch>
+                  <Route exact path="/" component={Login} />
+                  <Redirect to="/" />
+                </Switch>
+                :
+                <div>
+                  <Route exact path="/" component={Search} />
+                  <Route exact path="/tickets" component={Tickets} />
+                </div>
+              }
+            </main>
+          </div>
+        }
       </div>
     );
   }
 }
 
-export default App;
+App.propTypes = {
+  has_initially_loaded: PropTypes.bool.isRequired,
+  user: PropTypes.object
+};
+
+const mapStateToProps = ({ auth }) => ({
+  has_initially_loaded: auth.has_initially_loaded,
+  user: auth.user
+});
+
+const mapDispatchToProps = (dispatch) => {
+  return {
+    getUser: () => dispatch(getUser())
+  }
+};
+
+export default connect(mapStateToProps, mapDispatchToProps)(App)
