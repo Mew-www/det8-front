@@ -8,7 +8,7 @@ const Tickets = props => (
     <h1>Tickets</h1>
     <p>todo</p>
 
-    <button onClick={() => props.gotoSearch()}>Go to Search</button>
+    <button onClick={() => props.gotoSearch()}>Go to Travelling</button>
   </div>
 )
 

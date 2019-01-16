@@ -3,9 +3,9 @@ import { push } from 'connected-react-router'
 import { bindActionCreators } from 'redux'
 import { connect } from 'react-redux'
 
-const Search = props => (
+const Travel = props => (
   <div>
-    <h1>Search</h1>
+    <h1>Travel</h1>
     <p>todo</p>
 
     <button onClick={() => props.gotoTickets()}>Go to ticketing</button>
@@ -16,4 +16,4 @@ const mapDispatchToProps = dispatch => bindActionCreators({
   gotoTickets: () => push('/tickets')
 }, dispatch);
 
-export default connect(null, mapDispatchToProps)(Search)
+export default connect(null, mapDispatchToProps)(Travel)
