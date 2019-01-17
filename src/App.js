@@ -1,7 +1,7 @@
 import React from 'react';
 import { Route, Link, Switch, Redirect } from 'react-router-dom'
 import Login from './subcomponents/Login'
-import Search from './subcomponents/Search'
+import Travel from './subcomponents/Travel'
 import Tickets from './subcomponents/Tickets'
 import PropTypes from 'prop-types'
 import { getUser } from './reducers/auth'
@@ -23,7 +23,7 @@ class App extends React.Component {
               :
               <header>
                 <p>Welcome {this.props.user.name}</p>
-                <Link to="/">Search</Link>
+                <Link to="/">Travel</Link>
                 <Link to="/tickets">Tickets</Link>
               </header>
             }
@@ -35,7 +35,7 @@ class App extends React.Component {
                 </Switch>
                 :
                 <div>
-                  <Route exact path="/" component={Search} />
+                  <Route exact path="/" component={Travel} />
                   <Route exact path="/tickets" component={Tickets} />
                 </div>
               }

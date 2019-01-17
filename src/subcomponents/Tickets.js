@@ -10,7 +10,7 @@ const Tickets = props => (
 
     <button onClick={() => props.gotoSearch()}>Go to Travelling</button>
   </div>
-)
+);
 
 const mapDispatchToProps = dispatch => bindActionCreators({
   gotoSearch: () => push('/')
