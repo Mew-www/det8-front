@@ -1,0 +1,12 @@
+.Itinerary {
+  &__route {
+
+  }
+  &__summary {
+    padding-top: 4px;
+    div {
+      display: inline-block;
+      padding: 4px;
+    }
+  }
+}

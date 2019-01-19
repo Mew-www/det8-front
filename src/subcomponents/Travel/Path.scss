@@ -1,0 +1,16 @@
+.Path {
+  display: inline-block;
+  border: dashed 1px black;
+  &__segment {
+    display: inline-block;
+    padding: 4px;
+    &-indicator {
+      padding-bottom: 3px;
+      text-align: center;
+    }
+    &-details {
+      font-style: italic;
+      text-align: center;
+    }
+  }
+}

@@ -1,7 +1,9 @@
 import React from 'react'
-import { togglePlanning, updateQuery, executeQuery } from '../reducers/routing'
+import { Multipath, Modepath, Walkpath, Startpath, Endpath } from './Path'
+import { togglePlanning, updateQuery, executeQuery } from '../../reducers/routing'
 import { push } from 'connected-react-router'
 import { connect } from 'react-redux'
+import './Travel.scss'
 
 const Travel = props => (
   <div>
@@ -65,7 +67,41 @@ const Travel = props => (
           <span>From lat{props.results.plan.from.lat} lon{props.results.plan.from.lon}</span>
           <span>To lat{props.results.plan.from.lat} lon{props.results.plan.from.lon}</span>
         </p>
-        <pre>{JSON.stringify(props.results.plan.itineraries)}</pre>
+        {props.results.plan.itineraries.map(itinerary => (
+          <div className="Itinerary">
+            <div className="Itinerary__route">
+              {itinerary.legs.map((path, i, arr) => (
+                i === 0 ?
+                  <Startpath
+                    start_loc={`${path.from.lon},${path.from.lat}`}
+                    start_time={`${('0'+(new Date(path.from.departure).getHours())).slice(-2)}:${('0'+(new Date(path.from.departure).getMinutes())).slice(-2)}`}
+                    walk_distance_km={Math.round(path.distance/100)/10}
+                  />
+                  :
+                  i < arr.length-1 ?
+                    path.mode === 'WALK' && path.distance > 100?
+                    <Walkpath
+                      walk_distance_km={Math.round(path.distance/100)/10}
+                    />
+                    :
+                    <Modepath
+                      path_mode={path.mode}
+                    />
+                    :
+                    <Endpath
+                      end_loc={`${path.to.lon},${path.to.lat}`}
+                      end_time={`${('0'+(new Date(path.to.arrival).getHours())).slice(-2)}:${('0'+(new Date(path.to.arrival).getMinutes())).slice(-2)}`}
+                      walk_distance_km={Math.round(path.distance/100)/10}
+                    />
+              ))}
+            </div>
+            <div className="Itinerary__summary">
+              <div>Walk: {Math.round(itinerary.walkDistance)}m</div>
+              <div>Duration: {Math.round(itinerary.duration/60)}min</div>
+              <div>Fees: ???</div>
+            </div>
+          </div>
+        ))}
       </div>
     }
     <button onClick={() => props.gotoTickets()}>Go to ticketing</button>

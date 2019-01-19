@@ -1,7 +1,7 @@
 import React from 'react';
 import { Route, Link, Switch, Redirect } from 'react-router-dom'
 import Login from './subcomponents/Login'
-import Travel from './subcomponents/Travel'
+import Travel from './subcomponents/Travel/Travel'
 import Tickets from './subcomponents/Tickets'
 import PropTypes from 'prop-types'
 import { getUser } from './reducers/auth'

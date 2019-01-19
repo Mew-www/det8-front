@@ -9,7 +9,7 @@ const initial_state = {
   query: {
     from_place: '',
     to_place: '',
-    mode: [],
+    mode: ['TRANSIT'],
     date: '',
     time: '',
     arrive_by: null,
