@@ -2,6 +2,7 @@ import React from 'react'
 import PropTypes from 'prop-types'
 import { login } from '../reducers/auth'
 import { connect } from 'react-redux'
+import './Login.scss'
 
 class Login extends React.Component {
   constructor() {
@@ -13,24 +14,31 @@ class Login extends React.Component {
   }
   render() {
     return (
-      <div>
+      <form className="Login"
+            onSubmit={
+              (event) => {
+                this.props.login(this.state.email, this.state.password);
+                event.preventDefault();
+              }
+      }>
         <h1>Login</h1>
         {this.props.error ? <p>{this.props.error}</p> : ""}
-        <input type="text"
-               placeholder="Email"
-               onChange={(event) => {this.setState({email: event.target.value});}}
-        />
-        <input type="password"
-               placeholder="Password"
-               onChange={(event) => {this.setState({password: event.target.value});}}
-        />
-        <button onClick={
-          (event) => {
-            event.preventDefault();
-            this.props.login(this.state.email, this.state.password);
-          }
-        }>Sign in</button>
-      </div>
+        <div className="Login__fields-group">
+          <input className="Login__field"
+                 type="text"
+                 placeholder="Email"
+                 onChange={(event) => {this.setState({email: event.target.value});}}
+          />
+          <input className="Login__field"
+                 type="password"
+                 placeholder="Password"
+                 onChange={(event) => {this.setState({password: event.target.value});}}
+          />
+        </div>
+        <input className="Login__submit"
+               type="submit"
+               value="Sign in" />
+      </form>
     )
   }
 }
