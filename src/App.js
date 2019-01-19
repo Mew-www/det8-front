@@ -23,8 +23,6 @@ class App extends React.Component {
               :
               <header>
                 <p>Welcome {this.props.user.name}</p>
-                <Link to="/">Travel</Link>
-                <Link to="/tickets">Tickets</Link>
               </header>
             }
             <main>

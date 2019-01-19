@@ -2,6 +2,7 @@ import axios from 'axios'
 
 export const TOGGLE_PLANNING = 'routing/TOGGLE_PLANNING';
 export const UPDATE_QUERY = 'routing/UPDATE_QUERY';
+export const UPDATE_MODE = 'routing/UPDATE_MODE';
 export const UPDATE_RESULTS = 'routing/EXECUTE_QUERY';
 
 const initial_state = {
@@ -9,7 +10,12 @@ const initial_state = {
   query: {
     from_place: '',
     to_place: '',
-    mode: ['TRANSIT'],
+    modes: {
+      'TRAM': true,
+      'BUS': true,
+      'SUBWAY': true,
+      'RAIL': true
+    },
     date: '',
     time: '',
     arrive_by: null,
@@ -33,9 +39,25 @@ export default (state = initial_state, action) => {
           ...action.data  // Use destructuring to override using keys present in action.data
         }
       };
+    case UPDATE_MODE:
+      return {
+        ...state,
+        query: {
+          ...state.query,
+          modes: {
+            ...state.query.modes,
+            ...action.data  // As with UPDATE_QUERY but on another level
+          }
+        }
+      };
     case UPDATE_RESULTS:
       return {
         ...state,
+        planning_is_minimized: true,
+        query: {
+          ...state.query,
+          error: ''
+        },
         results: action.data
       };
     default:
@@ -52,6 +74,14 @@ export function togglePlanning() {
 export function updateQuery(partial_query_object) {
   return dispatch => {
     dispatch({type: UPDATE_QUERY, data: partial_query_object})
+  }
+};
+
+export function updateMode(mode_name, mode_checked) {
+  return dispatch => {
+    let partial_mode_obj = {};
+    partial_mode_obj[mode_name] = mode_checked;
+    dispatch({type: UPDATE_MODE, data: partial_mode_obj})
   }
 };
 
@@ -105,9 +135,13 @@ export function executeQuery(full_query_object) {
               `&toPlace=${to_coords[1]},${to_coords[0]}`+
               `&date=${full_query_object.date}`+
               `&time=${full_query_object.time}`+
-              `&mode=${['WALK'].concat(full_query_object.mode).join(',')}`+
+              `&mode=${['WALK'].concat(
+                Object.keys(full_query_object.modes).filter(mode_name => {
+                  return full_query_object.modes[mode_name]
+                })
+              ).join(',')}`+
               `&arriveBy=${full_query_object.arrive_by.toString()}`+
-              `&maxWalkDistance=500`,
+              `&maxWalkDistance=2000`,
               {headers: {'Content-Type': "application/json"}}
             )
               .then(response => {

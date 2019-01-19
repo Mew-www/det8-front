@@ -5,10 +5,11 @@ import { connect } from 'react-redux'
 
 const Tickets = props => (
   <div>
+    <p>
+      <button onClick={() => props.gotoSearch()}>Go to Travelling</button>
+    </p>
     <h1>Tickets</h1>
     <p>todo</p>
-
-    <button onClick={() => props.gotoSearch()}>Go to Travelling</button>
   </div>
 );
 

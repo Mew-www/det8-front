@@ -1,7 +1,31 @@
-.Itinerary {
-  &__route {
+%title_font {
+  font-size: 24px;
+}
 
+.Plan {
+  margin: 4px;
+  padding: 4px;
+  border: dashed 1px black;
+  &__title {
+    @extend %title_font;
   }
+}
+
+.PlanToggler {
+  font-style: italic;
+}
+
+.Recommendation {
+  margin: 4px;
+  padding: 4px;
+  border: dashed 1px black;
+  &__title {
+    @extend %title_font;
+  }
+}
+
+.Itinerary {
+  &__route { }
   &__summary {
     padding-top: 4px;
     div {

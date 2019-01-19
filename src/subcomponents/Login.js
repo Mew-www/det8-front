@@ -22,6 +22,7 @@ class Login extends React.Component {
               }
       }>
         <h1>Login</h1>
+        <p>(user1@example.com & password1; user2 & password2)</p>
         {this.props.error ? <p>{this.props.error}</p> : ""}
         <div className="Login__fields-group">
           <input className="Login__field"

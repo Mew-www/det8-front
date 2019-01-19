@@ -1,26 +1,47 @@
 import React from 'react'
 import { Multipath, Modepath, Walkpath, Startpath, Endpath } from './Path'
-import { togglePlanning, updateQuery, executeQuery } from '../../reducers/routing'
+import { togglePlanning, updateQuery, updateMode, executeQuery } from '../../reducers/routing'
 import { push } from 'connected-react-router'
 import { connect } from 'react-redux'
 import './Travel.scss'
 
 const Travel = props => (
   <div>
-    {JSON.stringify(props.query)}
+    <p>
+      <button onClick={() => props.gotoTickets()}>Go to ticketing</button>
+    </p>
+    {props.query.error ? <p>{props.query.error}</p> : ''}
     {!props.planning_is_minimized ?
       <div className="Plan">
-        <p className="Plan__title">
-          <span>Traveling</span>
-          {props.results ? <span onClick={(event) => props.togglePlanning()}>^</span> : ''}
+        <p className="Plan__header">
+          <span className="Plan__title">Traveling</span>
+          {props.results ? <span>&nbsp;<button onClick={(event) => props.togglePlanning()}>Hide planner</button></span> : ''}
         </p>
         <div className="Plan__controls">
+          <div className="Plan__modes">
+            {Object.keys(props.query.modes).map(mode_name => (
+              <label>
+                <input type="checkbox"
+                       name="mode"
+                       value={mode_name}
+                       checked={props.query.modes[mode_name]}
+                       onChange={(event) => {
+                         props.updateMode(mode_name, event.target.checked);
+                       }}
+                />
+                &nbsp;
+                <span>{mode_name}</span>
+              </label>
+            ))}
+          </div>
           <input type="text"
                  placeholder="Place from"
+                 value={props.query.from_place}
                  onChange={(event) => {props.updateQuery({from_place: event.target.value});}}
           />
           <input type="text"
                  placeholder="Place to"
+                 value={props.query.to_place}
                  onChange={(event) => {props.updateQuery({to_place: event.target.value});}}
           />
           <div className="Plan__time-control">
@@ -38,6 +59,11 @@ const Travel = props => (
             </div>
             <input type="text"
                    placeholder="MM-DD-YYYY hh:mm"
+                   defaultValue={props.query.date && props.query.time ?
+                     props.query.date+' '+props.query.time
+                     :
+                     ''
+                   }
                    onChange={(event) => {
                      props.updateQuery({
                        date: event.target.value.split(' ')[0],
@@ -50,7 +76,15 @@ const Travel = props => (
       </div>
       :
       <button className="PlanToggler" onClick={(event) => {props.togglePlanning();}}>
-        ... \/
+        <span>From {props.query.from_place}</span>
+        &nbsp;
+        <span>To {props.query.to_place}</span>
+        &nbsp;
+        <span>{!props.query.arrive_by ? 'leaving' : 'arriving'} {props.query.date} {props.query.time}</span>
+        &nbsp;
+        <span>using {Object.keys(props.query.modes).filter(mode_name => props.query.modes[mode_name]).join(',')}</span>
+        &nbsp;
+        <span>[Show planner]</span>
       </button>
     }
     {!props.results ?
@@ -62,7 +96,7 @@ const Travel = props => (
         <p>No known history (previously searched routes) :[</p>
       :
       <div className="Recommendation">
-        <span>Optimal routes</span>
+        <span className="Recommendation__title">Optimal routes</span>
         <p>
           <span>From lat{props.results.plan.from.lat} lon{props.results.plan.from.lon}</span>
           <span>To lat{props.results.plan.from.lat} lon{props.results.plan.from.lon}</span>
@@ -98,13 +132,21 @@ const Travel = props => (
             <div className="Itinerary__summary">
               <div>Walk: {Math.round(itinerary.walkDistance)}m</div>
               <div>Duration: {Math.round(itinerary.duration/60)}min</div>
-              <div>Fees: ???</div>
+              <div>
+                <span>Fees (zones travelled):</span>
+                &nbsp;
+                <span>{itinerary.legs.reduce((accumulator, path) => {return accumulator
+                    .concat(accumulator.indexOf(path.from.zoneId) === -1 ? [path.from.zoneId] : [])
+                    .concat(accumulator.indexOf(path.to.zoneId) === -1 ? [path.to.zoneId] : [])
+                }, [])
+                  .filter(zone => zone !== undefined && zone.toString().trim())
+                  .join(',')}</span>
+              </div>
             </div>
           </div>
         ))}
       </div>
     }
-    <button onClick={() => props.gotoTickets()}>Go to ticketing</button>
   </div>
 );
 
@@ -118,6 +160,7 @@ const mapDispatchToProps = (dispatch) => {
   return {
     togglePlanning: () => dispatch(togglePlanning()),
     updateQuery: (partial_query_obj) => dispatch(updateQuery(partial_query_obj)),
+    updateMode: (mode_name, mode_checked) => dispatch(updateMode(mode_name, mode_checked)),
     executeQuery: (full_query_obj) => dispatch(executeQuery(full_query_obj)),
     gotoTickets: () => dispatch(push('/tickets'))
   }
