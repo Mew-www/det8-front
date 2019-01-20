@@ -1,5 +1,5 @@
 import React from 'react';
-import { Route, Link, Switch, Redirect } from 'react-router-dom'
+import { Route, Switch, Redirect } from 'react-router-dom'
 import Login from './subcomponents/Login'
 import Travel from './subcomponents/Travel/Travel'
 import Tickets from './subcomponents/Tickets'

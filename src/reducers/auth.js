@@ -30,9 +30,15 @@ export default (state = initial_state, action) => {
 
 export function getUser() {
   return dispatch => {
-    axios.get('http://localhost:3030/auth')
-      .then(response => {
-        dispatch({type: GET_USER, data: {user: response.data}})
+    axios.get('http://localhost:3030/auth', {withCredentials: true})
+      .then(response1 => {
+        axios.get('http://localhost:3030/history', {withCredentials: true})
+          .then(response2 => {
+            dispatch({type: GET_USER, data: {user: {...response1.data, history: response2.data}}})
+          })
+          .catch(error => {
+            dispatch({type: GET_USER, data: {user: null}})
+          })
       })
       .catch(error => {
         dispatch({type: GET_USER, data: {user: null}})
@@ -42,7 +48,7 @@ export function getUser() {
 
 export function login(username, password) {
   return dispatch => {
-    axios.post('http://localhost:3030/auth', {'email': username, 'password': password})
+    axios.post('http://localhost:3030/auth', {'email': username, 'password': password}, {withCredentials: true})
       .then(response => {
         dispatch({type: LOG_IN, data: {error: null, user: response.data}})
       })

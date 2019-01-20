@@ -122,14 +122,14 @@ export function executeQuery(full_query_object) {
       `?text=${full_query_object.from_place}`+
       `&size=1`
     )
-    .then(response => {
-      let from_coords = response.data.features[0].geometry.coordinates;
+    .then(response1 => {
+      let from_coords = response1.data.features[0].geometry.coordinates;
         axios.get(`https://api.digitransit.fi/geocoding/v1/search`+
           `?text=${full_query_object.to_place}`+
           `&size=1`
         )
-          .then(response => {
-            let to_coords = response.data.features[0].geometry.coordinates;
+          .then(response2 => {
+            let to_coords = response2.data.features[0].geometry.coordinates;
             axios.get(`http://142.93.228.154:8080/otp/routers/default/plan`+
               `?fromPlace=${from_coords[1]},${from_coords[0]}`+
               `&toPlace=${to_coords[1]},${to_coords[0]}`+
@@ -144,8 +144,14 @@ export function executeQuery(full_query_object) {
               `&maxWalkDistance=2000`,
               {headers: {'Content-Type': "application/json"}}
             )
-              .then(response => {
-                dispatch({type: UPDATE_RESULTS, data: response.data})
+              .then(response3 => {
+                axios.post('http://localhost:3030/history', {queries: [{...full_query_object, error: ''}]}, {withCredentials: true})
+                  .then(response4 => {
+                    dispatch({type: UPDATE_RESULTS, data: response3.data})
+                  })
+                  .catch(error => {
+                    dispatch({type: UPDATE_QUERY, data: {error: error.response.data}})
+                  })
               })
               .catch(error => {
                 dispatch({type: UPDATE_QUERY, data: {error: error.response.data}})
