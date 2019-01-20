@@ -96,9 +96,21 @@ class Travel extends React.Component {
         {!this.props.results ?
           this.props.user.history && this.props.user.history.length ?
             <div className="History">
-              <span>Common routes</span>
+              <p>
+                <span>Common routes</span>
+              </p>
               {this.props.user.history.map(history => (
-                <div>{JSON.stringify(history)}</div>
+                <div>
+                  <button onClick={(event) => {this.props.updateQuery(history);}}>
+                    <span>From {history.from_place}</span>
+                    &nbsp;
+                    <span>To {history.to_place}</span>
+                    &nbsp;
+                    <span>{!history.arrive_by ? 'leaving' : 'arriving'} {history.date} {history.time}</span>
+                    &nbsp;
+                    <span>using {Object.keys(history.modes).filter(mode_name => history.modes[mode_name]).join(',')}</span>
+                  </button>
+                </div>
               ))}
             </div>
             :
