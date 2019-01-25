@@ -34,7 +34,17 @@ export function getUser() {
       .then(response1 => {
         axios.get('http://localhost:3030/history', {withCredentials: true})
           .then(response2 => {
-            dispatch({type: GET_USER, data: {user: {...response1.data, history: response2.data}}})
+            axios.get('http://localhost:3030/tickets', {withCredentials: true})
+              .then(response3 => {
+                dispatch({type: GET_USER, data: {user: {
+                  ...response1.data,
+                  history: response2.data,
+                  tickets: response3.data
+                }}})
+              })
+              .catch(error => {
+                dispatch({type: GET_USER, data: {user: null}})
+              })
           })
           .catch(error => {
             dispatch({type: GET_USER, data: {user: null}})

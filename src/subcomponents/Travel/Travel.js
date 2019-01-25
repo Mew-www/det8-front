@@ -1,10 +1,40 @@
 import React from 'react'
-import { Multipath, Modepath, Walkpath, Startpath, Endpath } from './Path'
+import { Modepath, Walkpath, Startpath, Endpath } from './Path'
 import { togglePlanning, updateQuery, updateMode, executeQuery } from '../../reducers/routing'
 import { getUser } from '../../reducers/auth'
 import { push } from 'connected-react-router'
 import { connect } from 'react-redux'
 import './Travel.scss'
+import tickettypes from '../../TicketConst'
+
+function findValidTickettypes(paths) {
+  // null => No ticket required
+  // false => No configured ticket found for these paths
+  // otherwise returns an array of class Ticket instances
+  let zones_crossed = paths.reduce((accumulator, path) => {
+    return accumulator
+      .concat(
+        path.from.zoneId !== undefined &&
+        path.from.zoneId.toString().trim() &&
+        path.to.zoneId !== undefined &&
+        path.to.zoneId.toString().trim() &&
+        accumulator.indexOf([path.from.zoneId, path.to.zoneId].sort().join('')) === -1 ?
+          [[path.from.zoneId, path.to.zoneId].sort().join('')]
+          :
+          []
+      )
+  }, []);
+  if (!zones_crossed.length) {
+    return null;
+  }
+  let viable_tickets = tickettypes.filter(ticket => {
+    return zones_crossed.every(zone => ticket.zones.indexOf(zone) !== -1);
+  });
+  if (!viable_tickets.length) {
+    return false;
+  }
+  return viable_tickets;
+}
 
 class Travel extends React.Component {
   componentDidMount () {
@@ -100,7 +130,7 @@ class Travel extends React.Component {
                 <span>Common routes</span>
               </p>
               {this.props.user.history.map(history => (
-                <div>
+                <div key={JSON.stringify(history)}>
                   <button onClick={(event) => {this.props.updateQuery(history);}}>
                     <span>From {history.from_place}</span>
                     &nbsp;
@@ -123,11 +153,12 @@ class Travel extends React.Component {
               <span>To lat{this.props.results.plan.from.lat} lon{this.props.results.plan.from.lon}</span>
             </p>
             {this.props.results.plan.itineraries.map(itinerary => (
-              <div className="Itinerary">
+              <div className="Itinerary" key={`${itinerary.startTime}-${itinerary.endTime}-${itinerary.walkDistance}`}>
                 <div className="Itinerary__route">
                   {itinerary.legs.map((path, i, arr) => (
                     i === 0 ?
                       <Startpath
+                        key="startpath"
                         start_loc={`${path.from.lon},${path.from.lat}`}
                         start_time={`${('0'+(new Date(path.from.departure).getHours())).slice(-2)}:${('0'+(new Date(path.from.departure).getMinutes())).slice(-2)}`}
                         walk_distance_km={Math.round(path.distance/100)/10}
@@ -136,14 +167,17 @@ class Travel extends React.Component {
                       i < arr.length-1 ?
                         path.mode === 'WALK' && path.distance > 100?
                           <Walkpath
+                            key={`${path.from.lon},${path.from.lat}-${path.to.lon},${path.to.lat}`}
                             walk_distance_km={Math.round(path.distance/100)/10}
                           />
                           :
                           <Modepath
+                            key={`${path.from.lon},${path.from.lat}-${path.to.lon},${path.to.lat}`}
                             path_mode={path.mode}
                           />
                         :
                         <Endpath
+                          key="endpath"
                           end_loc={`${path.to.lon},${path.to.lat}`}
                           end_time={`${('0'+(new Date(path.to.arrival).getHours())).slice(-2)}:${('0'+(new Date(path.to.arrival).getMinutes())).slice(-2)}`}
                           walk_distance_km={Math.round(path.distance/100)/10}
@@ -154,14 +188,40 @@ class Travel extends React.Component {
                   <div>Walk: {Math.round(itinerary.walkDistance)}m</div>
                   <div>Duration: {Math.round(itinerary.duration/60)}min</div>
                   <div>
-                    <span>Fees (zones travelled):</span>
+                    <span>Tickets required:</span>
                     &nbsp;
-                    <span>{itinerary.legs.reduce((accumulator, path) => {return accumulator
-                      .concat(accumulator.indexOf(path.from.zoneId) === -1 ? [path.from.zoneId] : [])
-                      .concat(accumulator.indexOf(path.to.zoneId) === -1 ? [path.to.zoneId] : [])
-                    }, [])
-                      .filter(zone => zone !== undefined && zone.toString().trim())
-                      .join(',')}</span>
+                    <span>
+                      {function(valid_tickets, existing_tickets) {
+                        return valid_tickets === null ?
+                          <span>No ticket required</span>
+                          :
+                          valid_tickets === false ?
+                            <span>{'Error: None of known ticket types is valid for this travel'.toUpperCase()}</span>
+                            :
+                            existing_tickets.some(owned_ticket => {
+                              return owned_ticket.valid_until > itinerary.endTime/1000 &&
+                                valid_tickets.map(t => t.agency).indexOf(owned_ticket.agency) !== -1 &&
+                                valid_tickets.map(t => t.name_fi).indexOf(owned_ticket.name) !== -1
+                            }) ?
+                              function(existing_valid_ticket) {
+                                return (
+                                  <span>No additional ticket required (currently owned {`${existing_valid_ticket.name}`} is valid for the trip</span>
+                                )
+                              }(existing_tickets.filter(owned_ticket => {
+                                return owned_ticket.valid_until > itinerary.endTime/1000 &&
+                                  valid_tickets.map(t => t.agency).indexOf(owned_ticket.agency) !== -1 &&
+                                  valid_tickets.map(t => t.name_fi).indexOf(owned_ticket.name) !== -1
+                              })[0])
+                              :
+                              valid_tickets.sort((a,b) => {return a.price_eur - b.price_eur}).map(ticket => (
+                                <span key={ticket.name_fi} style={{margin: "4px"}}>
+                                  <span>{`${ticket.name_fi} (${ticket.price_eur}€)`}</span>
+                                  &nbsp;
+                                  <button onClick={() => {console.log('TODO buy '+ticket.name_fi)}}>[buy]</button>
+                                </span>
+                              ))
+                      }(findValidTickettypes(itinerary.legs), this.props.user.tickets)}
+                    </span>
                   </div>
                 </div>
               </div>
