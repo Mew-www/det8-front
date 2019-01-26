@@ -1,7 +1,7 @@
 import React from 'react'
 import { Modepath, Walkpath, Startpath, Endpath } from './Path'
 import { togglePlanning, updateQuery, updateMode, executeQuery } from '../../reducers/routing'
-import { getUser } from '../../reducers/auth'
+import { getUser, buyTicket } from '../../reducers/auth'
 import { push } from 'connected-react-router'
 import { connect } from 'react-redux'
 import './Travel.scss'
@@ -191,7 +191,7 @@ class Travel extends React.Component {
                     <span>Tickets required:</span>
                     &nbsp;
                     <span>
-                      {function(valid_tickets, existing_tickets) {
+                      {function(valid_tickets, existing_tickets, phone_num, buy_ticket_fn) {
                         return valid_tickets === null ?
                           <span>No ticket required</span>
                           :
@@ -217,10 +217,10 @@ class Travel extends React.Component {
                                 <span key={ticket.name_fi} style={{margin: "4px"}}>
                                   <span>{`${ticket.name_fi} (${ticket.price_eur}€)`}</span>
                                   &nbsp;
-                                  <button onClick={() => {console.log('TODO buy '+ticket.name_fi)}}>[buy]</button>
+                                  <button onClick={() => {buy_ticket_fn(ticket.agency, ticket.options(phone_num, new Date(itinerary.startTime).toISOString()))}}>[buy]</button>
                                 </span>
                               ))
-                      }(findValidTickettypes(itinerary.legs), this.props.user.tickets)}
+                      }(findValidTickettypes(itinerary.legs), this.props.user.tickets, this.props.user.phone, this.props.buyTicket)}
                     </span>
                   </div>
                 </div>
@@ -247,7 +247,8 @@ const mapDispatchToProps = (dispatch) => {
     updateMode: (mode_name, mode_checked) => dispatch(updateMode(mode_name, mode_checked)),
     executeQuery: (full_query_obj) => dispatch(executeQuery(full_query_obj)),
     gotoTickets: () => dispatch(push('/tickets')),
-    getUser: () => dispatch(getUser())
+    getUser: () => dispatch(getUser()),
+    buyTicket: (agency, options) => dispatch(buyTicket(agency, options))
   }
 };
 

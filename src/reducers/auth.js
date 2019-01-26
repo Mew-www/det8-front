@@ -67,3 +67,24 @@ export function login(username, password) {
       })
   }
 };
+
+export function buyTicket(agency, ticket_options) {
+  return dispatch => {
+    switch(agency) {
+      case 'HSL': {
+        axios.post('http://localhost:3030/buyHSL', ticket_options, {withCredentials: true})
+          .then(response => {
+            console.log(response.data);
+            // TODO save the ticket data and display in /ticketing -page
+          })
+          .catch(error => {
+            console.log(error);
+          });
+        break;
+      }
+      default: {
+        break;
+      }
+    }
+  }
+};
