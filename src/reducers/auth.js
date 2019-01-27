@@ -68,17 +68,52 @@ export function login(username, password) {
   }
 };
 
-export function buyTicket(agency, ticket_options) {
+export function buyTicket(name, agency, ticket_options) {
   return dispatch => {
     switch(agency) {
       case 'HSL': {
         axios.post('http://localhost:3030/buyHSL', ticket_options, {withCredentials: true})
           .then(response => {
-            console.log(response.data);
-            // TODO save the ticket data and display in /ticketing -page
+            const ticket = {
+              valid_until: Math.round((new Date(response.data.validFrom)).getTime()/1000)+60*80,
+              agency: agency,
+              name: name,
+              uid: response.data.ticketId,
+              secret: response.data.phoneNumber
+            };
+            console.log(ticket);
+            axios.post('http://localhost:3030/tickets', ticket, {withCredentials: true})
+              .then(response0 => {
+                axios.get('http://localhost:3030/auth', {withCredentials: true})
+                  .then(response1 => {
+                    axios.get('http://localhost:3030/history', {withCredentials: true})
+                      .then(response2 => {
+                        axios.get('http://localhost:3030/tickets', {withCredentials: true})
+                          .then(response3 => {
+                            dispatch({type: GET_USER, data: {user: {
+                              ...response1.data,
+                              history: response2.data,
+                              tickets: response3.data
+                            }}})
+                          })
+                          .catch(error => {
+                            dispatch({type: GET_USER, data: {user: null}})
+                          })
+                      })
+                      .catch(error => {
+                        dispatch({type: GET_USER, data: {user: null}})
+                      })
+                  })
+                  .catch(error => {
+                    dispatch({type: GET_USER, data: {user: null}})
+                  })
+              })
+              .catch(error => {
+                dispatch({type: GET_USER, data: {user: null}})
+              })
           })
           .catch(error => {
-            console.log(error);
+            dispatch({type: GET_USER, data: {user: null}})
           });
         break;
       }

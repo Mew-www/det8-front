@@ -217,7 +217,7 @@ class Travel extends React.Component {
                                 <span key={ticket.name_fi} style={{margin: "4px"}}>
                                   <span>{`${ticket.name_fi} (${ticket.price_eur}€)`}</span>
                                   &nbsp;
-                                  <button onClick={() => {buy_ticket_fn(ticket.agency, ticket.options(phone_num, new Date(itinerary.startTime).toISOString()))}}>[buy]</button>
+                                  <button onClick={() => {buy_ticket_fn(ticket.name_fi, ticket.agency, ticket.options(phone_num, new Date(itinerary.startTime).toISOString()))}}>[buy]</button>
                                 </span>
                               ))
                       }(findValidTickettypes(itinerary.legs), this.props.user.tickets, this.props.user.phone, this.props.buyTicket)}
@@ -248,7 +248,7 @@ const mapDispatchToProps = (dispatch) => {
     executeQuery: (full_query_obj) => dispatch(executeQuery(full_query_obj)),
     gotoTickets: () => dispatch(push('/tickets')),
     getUser: () => dispatch(getUser()),
-    buyTicket: (agency, options) => dispatch(buyTicket(agency, options))
+    buyTicket: (name, agency, options) => dispatch(buyTicket(name, agency, options))
   }
 };
 
