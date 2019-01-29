@@ -14,7 +14,8 @@ const initial_state = {
       'TRAM': true,
       'BUS': true,
       'SUBWAY': true,
-      'RAIL': true
+      'RAIL': true,
+      'FUNICULAR': true
     },
     date: '',
     time: '',
