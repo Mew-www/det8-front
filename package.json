@@ -6,6 +6,7 @@
     "axios": "^0.18.0",
     "connected-react-router": "^6.2.1",
     "history": "^4.7.2",
+    "jwt-decode": "^2.2.0",
     "node-sass": "^4.11.0",
     "prop-types": "^15.6.2",
     "react": "^16.7.0",
